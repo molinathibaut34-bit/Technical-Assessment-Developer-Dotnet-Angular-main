@@ -1,8 +1,8 @@
 <div class="user-form-container">
-  <h2>{{ title }}</h2>
+  <h2>{{ title() }}</h2>
 
-  @if (error) {
-    <div class="error">{{ error }}</div>
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
   }
 
   <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
@@ -47,15 +47,34 @@
       </label>
     </div>
 
+    <div class="form-group">
+      <label for="monthlyExpenseQuota">Quota mensuel de dépenses (€) *</label>
+      <input
+        id="monthlyExpenseQuota"
+        type="number"
+        formControlName="monthlyExpenseQuota"
+        [class.error]="userForm.get('monthlyExpenseQuota')?.invalid && userForm.get('monthlyExpenseQuota')?.touched"
+        step="0.01"
+        min="0"
+        placeholder="1000"
+      />
+      @if (userForm.get('monthlyExpenseQuota')?.hasError('required') && userForm.get('monthlyExpenseQuota')?.touched) {
+        <span class="error-message">Le quota mensuel est requis</span>
+      }
+      @if (userForm.get('monthlyExpenseQuota')?.hasError('min') && userForm.get('monthlyExpenseQuota')?.touched) {
+        <span class="error-message">Le quota doit être supérieur ou égal à 0</span>
+      }
+    </div>
+
     <div class="form-actions">
-      <button type="button" class="btn-cancel" (click)="onCancel()" [disabled]="isSubmitting">
+      <button type="button" class="btn-cancel" (click)="onCancel()" [disabled]="isSubmitting()">
         Annuler
       </button>
-      <button type="submit" class="btn-submit" [disabled]="userForm.invalid || isSubmitting">
-        @if (isSubmitting) {
+      <button type="submit" class="btn-submit" [disabled]="userForm.invalid || isSubmitting()">
+        @if (isSubmitting()) {
           Enregistrement...
         } @else {
-          {{ isEditMode ? 'Modifier' : 'Créer' }}
+          {{ isEditMode() ? 'Modifier' : 'Créer' }}
         }
       </button>
     </div>

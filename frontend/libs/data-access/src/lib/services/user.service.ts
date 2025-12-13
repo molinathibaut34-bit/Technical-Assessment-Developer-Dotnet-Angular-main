@@ -14,18 +14,21 @@ export interface UserDetail {
   lastName: string;
   name: string;
   isActive: boolean;
+  monthlyExpenseQuota: number;
 }
 
 export interface CreateUserRequest {
   firstName: string;
   lastName: string;
   isActive: boolean;
+  monthlyExpenseQuota: number;
 }
 
 export interface UpdateUserRequest {
   firstName: string;
   lastName: string;
   isActive: boolean;
+  monthlyExpenseQuota: number;
 }
 
 @Injectable({

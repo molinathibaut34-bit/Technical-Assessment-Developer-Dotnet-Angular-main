@@ -1,43 +1,61 @@
 <div class="expense-list-container">
   <div class="header">
     <h2>Liste des dépenses</h2>
-    @if (!showForm) {
+    @if (!showForm()) {
       <button class="btn-add" (click)="onAddExpense()">+ Ajouter une dépense</button>
     }
   </div>
 
-  @if (showForm) {
+  @if (showForm()) {
     <app-expense-form
       (saved)="onFormSaved()"
       (cancelled)="onFormCancelled()"
     />
   }
 
-  @if (loading) {
+  @if (loading()) {
     <div class="loading">Chargement...</div>
   }
 
-  @if (error && !showForm) {
-    <div class="error">{{ error }}</div>
+  @if (error() && !showForm()) {
+    <div class="error">{{ error() }}</div>
   }
 
-  @if (!loading && !error && !showForm) {
-    @if (expenses.length === 0) {
+  @if (!loading() && !error() && !showForm()) {
+    @if (expenses().length === 0) {
       <div class="empty">Aucune dépense trouvée</div>
     } @else {
+      <div class="expenses-summary">
+        <div class="summary-item">
+          <span class="summary-label">Nombre de dépenses :</span>
+          <span class="summary-value">{{ expenses().length }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Total :</span>
+          <span class="summary-value total">{{ formatAmount(totalAmount()) }}</span>
+        </div>
+      </div>
+
       <table class="expense-table">
         <thead>
           <tr>
+            <th>Utilisateur</th>
             <th>Description</th>
             <th>Montant</th>
             <th>Date</th>
             <th>Catégorie</th>
             <th>Adresse de facturation</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          @for (expense of expenses; track expense.id) {
+          @for (expense of expenses(); track expense.id) {
             <tr>
+              <td>
+                <a [routerLink]="['/users', expense.userId]" class="user-link">
+                  {{ expense.userName }}
+                </a>
+              </td>
               <td>{{ expense.description }}</td>
               <td class="amount">{{ formatAmount(expense.amount) }}</td>
               <td>{{ formatDate(expense.date) }}</td>
@@ -71,6 +89,11 @@
                 } @else {
                   <span class="no-address">-</span>
                 }
+              </td>
+              <td>
+                <button class="btn-delete" (click)="onDeleteExpense(expense.id, expense.description)" title="Supprimer">
+                  🗑️
+                </button>
               </td>
             </tr>
           }

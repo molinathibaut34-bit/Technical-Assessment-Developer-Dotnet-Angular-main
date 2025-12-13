@@ -7,9 +7,9 @@ namespace WebApi.Infrastructure.Api;
 internal static class UserEndpoints
 {
     public sealed record UserInfo(Guid Id, string Name, bool IsActive);
-    public sealed record UserDetailInfo(Guid Id, string FirstName, string LastName, string Name, bool IsActive);
-    public sealed record CreateUserRequest(string FirstName, string LastName, bool IsActive);
-    public sealed record UpdateUserRequest(string FirstName, string LastName, bool IsActive);
+    public sealed record UserDetailInfo(Guid Id, string FirstName, string LastName, string Name, bool IsActive, decimal MonthlyExpenseQuota);
+    public sealed record CreateUserRequest(string FirstName, string LastName, bool IsActive, decimal MonthlyExpenseQuota);
+    public sealed record UpdateUserRequest(string FirstName, string LastName, bool IsActive, decimal MonthlyExpenseQuota);
 
     public static IEndpointRouteBuilder MapUserEndpoints(this IEndpointRouteBuilder endpoints)
     {
@@ -63,7 +63,7 @@ internal static class UserEndpoints
     {
         var user = db.Set<User>()
             .Where(u => u.Id == id)
-            .Select(u => new UserDetailInfo(u.Id, u.FirstName, u.LastName, $"{u.FirstName} {u.LastName}", u.IsActive))
+            .Select(u => new UserDetailInfo(u.Id, u.FirstName, u.LastName, $"{u.FirstName} {u.LastName}", u.IsActive, u.MonthlyExpenseQuota))
             .FirstOrDefault();
 
         if (user == null)
@@ -80,7 +80,8 @@ internal static class UserEndpoints
         {
             FirstName = request.FirstName,
             LastName = request.LastName,
-            IsActive = request.IsActive
+            IsActive = request.IsActive,
+            MonthlyExpenseQuota = request.MonthlyExpenseQuota
         };
 
         db.Set<User>().Add(user);
@@ -91,7 +92,8 @@ internal static class UserEndpoints
             user.FirstName,
             user.LastName,
             $"{user.FirstName} {user.LastName}",
-            user.IsActive);
+            user.IsActive,
+            user.MonthlyExpenseQuota);
 
         return Results.Created($"/users/{user.Id}", userDetail);
     }
@@ -108,6 +110,7 @@ internal static class UserEndpoints
         user.FirstName = request.FirstName;
         user.LastName = request.LastName;
         user.IsActive = request.IsActive;
+        user.MonthlyExpenseQuota = request.MonthlyExpenseQuota;
 
         db.SaveChanges();
 
@@ -116,7 +119,8 @@ internal static class UserEndpoints
             user.FirstName,
             user.LastName,
             $"{user.FirstName} {user.LastName}",
-            user.IsActive);
+            user.IsActive,
+            user.MonthlyExpenseQuota);
 
         return Results.Ok(userDetail);
     }

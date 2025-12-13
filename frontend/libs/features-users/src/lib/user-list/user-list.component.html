@@ -1,33 +1,33 @@
 <div class="user-list-container">
   <div class="header">
     <h2>Liste des utilisateurs</h2>
-    @if (!showForm) {
+    @if (!showForm()) {
       <button class="btn-add" (click)="onAddUser()">+ Ajouter un utilisateur</button>
     }
   </div>
 
-  @if (showForm) {
+  @if (showForm()) {
     <app-user-form
-      [user]="editingUser"
+      [user]="editingUser()"
       (saved)="onFormSaved()"
       (cancelled)="onFormCancelled()"
     />
   }
 
-  @if (loading) {
+  @if (loading()) {
     <div class="loading">Chargement...</div>
   }
 
-  @if (error && !showForm) {
-    <div class="error">{{ error }}</div>
+  @if (error() && !showForm()) {
+    <div class="error">{{ error() }}</div>
   }
 
-  @if (!loading && !error && !showForm) {
-    @if (users.length === 0) {
+  @if (!loading() && !error() && !showForm()) {
+    @if (users().length === 0) {
       <div class="empty">Aucun utilisateur trouvé</div>
     } @else {
       <ul class="user-list">
-        @for (user of users; track user.id) {
+        @for (user of users(); track user.id) {
           <li class="user-item">
             <a [routerLink]="['/users', user.id]" class="user-link">
               <span class="user-name">{{ user.name }}</span>

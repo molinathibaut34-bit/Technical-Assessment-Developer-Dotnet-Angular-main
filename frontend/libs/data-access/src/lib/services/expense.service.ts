@@ -9,6 +9,7 @@ export interface Expense {
   date: string;
   category?: string;
   userId: string;
+  userName: string;
   billingCompany?: string;
   billingStreet?: string;
   billingPostalCode?: string;
@@ -45,6 +46,14 @@ export class ExpenseService {
 
   createExpense(expense: CreateExpenseRequest): Observable<Expense> {
     return this.http.post<Expense>(this.apiUrl, expense);
+  }
+
+  getExpensesByUserId(userId: string): Observable<Expense[]> {
+    return this.http.get<Expense[]>(`${this.apiUrl}/user/${userId}`);
+  }
+
+  deleteExpense(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }
 

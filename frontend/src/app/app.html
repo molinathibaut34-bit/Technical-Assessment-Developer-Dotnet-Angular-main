@@ -1,2 +1,13 @@
-<!-- <app-nx-welcome></app-nx-welcome> -->
-<router-outlet></router-outlet>
+
+<nav class="main-nav">
+  <div class="nav-container">
+    <h1 class="nav-title">N2F</h1>
+    <div class="nav-links">
+      <a routerLink="/users" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}">Utilisateurs</a>
+      <a routerLink="/expenses" routerLinkActive="active">Dépenses</a>
+    </div>
+  </div>
+</nav>
+<main class="main-content">
+  <router-outlet></router-outlet>
+</main>

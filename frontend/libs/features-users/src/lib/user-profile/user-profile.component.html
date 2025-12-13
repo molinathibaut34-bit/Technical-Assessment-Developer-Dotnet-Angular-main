@@ -1,46 +1,170 @@
 <div class="user-profile-container">
   <button class="back-button" (click)="goBack()">← Retour à la liste</button>
 
-  @if (loading) {
+  @if (loading()) {
     <div class="loading">Chargement du profil...</div>
   }
 
-  @if (error) {
-    <div class="error">{{ error }}</div>
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
   }
 
-  @if (!loading && !error && user) {
+  @if (!loading() && !error() && user()) {
     <div class="profile-card">
       <h1>Profil utilisateur</h1>
       
       <div class="profile-content">
         <div class="profile-field">
           <label>ID :</label>
-          <span class="value">{{ user.id }}</span>
+          <span class="value">{{ user()!.id }}</span>
         </div>
         
         <div class="profile-field">
           <label>Prénom :</label>
-          <span class="value">{{ user.firstName }}</span>
+          <span class="value">{{ user()!.firstName }}</span>
         </div>
         
         <div class="profile-field">
           <label>Nom :</label>
-          <span class="value">{{ user.lastName }}</span>
+          <span class="value">{{ user()!.lastName }}</span>
         </div>
         
         <div class="profile-field">
           <label>Nom complet :</label>
-          <span class="value">{{ user.name }}</span>
+          <span class="value">{{ user()!.name }}</span>
         </div>
         
         <div class="profile-field">
           <label>Statut :</label>
-          <span class="value status" [class.active]="user.isActive" [class.inactive]="!user.isActive">
-            {{ user.isActive ? 'Actif' : 'Inactif' }}
+          <span class="value status" [class.active]="user()!.isActive" [class.inactive]="!user()!.isActive">
+            {{ user()!.isActive ? 'Actif' : 'Inactif' }}
           </span>
         </div>
       </div>
+    </div>
+
+    <div class="expenses-section">
+      <div class="expenses-header">
+        <h2>Dépenses</h2>
+        @if (!showExpenseForm()) {
+          <button 
+            class="btn-add-expense" 
+            [class.disabled]="quotaExceeded() || !user()?.isActive"
+            [disabled]="quotaExceeded() || !user()?.isActive"
+            (click)="onAddExpense()"
+            [title]="!user()?.isActive ? 'L\'utilisateur est inactif' : (quotaExceeded() ? 'Le quota mensuel est dépassé' : 'Ajouter une dépense')"
+          >
+            + Ajouter une dépense
+          </button>
+        }
+      </div>
+
+      @if (showExpenseForm()) {
+        <app-expense-form
+          [userId]="userId!"
+          (saved)="onExpenseFormSaved()"
+          (cancelled)="onExpenseFormCancelled()"
+        />
+      }
+
+      @if (loadingExpenses()) {
+        <div class="loading">Chargement des dépenses...</div>
+      }
+
+      @if (!loadingExpenses() && !showExpenseForm()) {
+        @if (expenses().length === 0) {
+          <div class="empty">Aucune dépense trouvée</div>
+        } @else {
+          <div class="quota-info" [class.quota-exceeded]="quotaExceeded()">
+            <div class="quota-item">
+              <span class="quota-label">Quota mensuel :</span>
+              <span class="quota-value">{{ formatAmount(user()!.monthlyExpenseQuota) }}</span>
+            </div>
+            <div class="quota-item">
+              <span class="quota-label">Dépenses du mois :</span>
+              <span class="quota-value" [class.exceeded]="quotaExceeded()">{{ formatAmount(monthlyTotal()) }}</span>
+            </div>
+            <div class="quota-item">
+              <span class="quota-label">Reste disponible :</span>
+              <span class="quota-value" [class.exceeded]="quotaExceeded()">{{ formatAmount(remainingQuota()) }}</span>
+            </div>
+            @if (quotaExceeded()) {
+              <div class="quota-warning">
+                ⚠️ Le quota mensuel est dépassé ! Vous ne pouvez plus ajouter de dépenses ce mois-ci.
+              </div>
+            }
+          </div>
+
+          <div class="expenses-summary">
+            <div class="summary-item">
+              <span class="summary-label">Nombre de dépenses :</span>
+              <span class="summary-value">{{ expenses().length }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Total :</span>
+              <span class="summary-value total">{{ formatAmount(totalAmount()) }}</span>
+            </div>
+          </div>
+
+          <table class="expenses-table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Montant</th>
+                <th>Date</th>
+                <th>Catégorie</th>
+                <th>Adresse de facturation</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (expense of expenses(); track expense.id) {
+                <tr>
+                  <td>{{ expense.description }}</td>
+                  <td class="amount">{{ formatAmount(expense.amount) }}</td>
+                  <td>{{ formatDate(expense.date) }}</td>
+                  <td>
+                    @if (expense.category) {
+                      <span class="category-badge">{{ expense.category }}</span>
+                    } @else {
+                      <span class="no-category">-</span>
+                    }
+                  </td>
+                  <td>
+                    @if (expense.billingCompany || expense.billingStreet) {
+                      <div class="billing-address">
+                        @if (expense.billingCompany) {
+                          <div class="billing-company">{{ expense.billingCompany }}</div>
+                        }
+                        @if (expense.billingStreet) {
+                          <div class="billing-street">{{ expense.billingStreet }}</div>
+                        }
+                        @if (expense.billingPostalCode || expense.billingCity) {
+                          <div class="billing-city">
+                            @if (expense.billingPostalCode) {
+                              <span>{{ expense.billingPostalCode }}</span>
+                            }
+                            @if (expense.billingCity) {
+                              <span>{{ expense.billingCity }}</span>
+                            }
+                          </div>
+                        }
+                      </div>
+                    } @else {
+                      <span class="no-address">-</span>
+                    }
+                  </td>
+                  <td>
+                    <button class="btn-delete" (click)="onDeleteExpense(expense.id, expense.description)" title="Supprimer">
+                      🗑️
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      }
     </div>
   }
 </div>
