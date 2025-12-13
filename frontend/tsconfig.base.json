@@ -1,0 +1,17 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+    "emitDecoratorMetadata": false,
+    "target": "es2022",
+    "module": "preserve",
+    "lib": ["es2020", "dom"],
+    "baseUrl": ".",
+    "paths": {
+      "@n2f/data-access": ["libs/data-access/src/index.ts"],
+      "@n2f/features-expenses": ["libs/features-expenses/src/index.ts"],
+      "@n2f/features-users": ["libs/features-users/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

@@ -1,0 +1,47 @@
+<div class="user-profile-container">
+  <button class="back-button" (click)="goBack()">← Retour à la liste</button>
+
+  @if (loading) {
+    <div class="loading">Chargement du profil...</div>
+  }
+
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+
+  @if (!loading && !error && user) {
+    <div class="profile-card">
+      <h1>Profil utilisateur</h1>
+      
+      <div class="profile-content">
+        <div class="profile-field">
+          <label>ID :</label>
+          <span class="value">{{ user.id }}</span>
+        </div>
+        
+        <div class="profile-field">
+          <label>Prénom :</label>
+          <span class="value">{{ user.firstName }}</span>
+        </div>
+        
+        <div class="profile-field">
+          <label>Nom :</label>
+          <span class="value">{{ user.lastName }}</span>
+        </div>
+        
+        <div class="profile-field">
+          <label>Nom complet :</label>
+          <span class="value">{{ user.name }}</span>
+        </div>
+        
+        <div class="profile-field">
+          <label>Statut :</label>
+          <span class="value status" [class.active]="user.isActive" [class.inactive]="!user.isActive">
+            {{ user.isActive ? 'Actif' : 'Inactif' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+

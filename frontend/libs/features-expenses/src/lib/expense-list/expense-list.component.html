@@ -1,0 +1,82 @@
+<div class="expense-list-container">
+  <div class="header">
+    <h2>Liste des dépenses</h2>
+    @if (!showForm) {
+      <button class="btn-add" (click)="onAddExpense()">+ Ajouter une dépense</button>
+    }
+  </div>
+
+  @if (showForm) {
+    <app-expense-form
+      (saved)="onFormSaved()"
+      (cancelled)="onFormCancelled()"
+    />
+  }
+
+  @if (loading) {
+    <div class="loading">Chargement...</div>
+  }
+
+  @if (error && !showForm) {
+    <div class="error">{{ error }}</div>
+  }
+
+  @if (!loading && !error && !showForm) {
+    @if (expenses.length === 0) {
+      <div class="empty">Aucune dépense trouvée</div>
+    } @else {
+      <table class="expense-table">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Montant</th>
+            <th>Date</th>
+            <th>Catégorie</th>
+            <th>Adresse de facturation</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (expense of expenses; track expense.id) {
+            <tr>
+              <td>{{ expense.description }}</td>
+              <td class="amount">{{ formatAmount(expense.amount) }}</td>
+              <td>{{ formatDate(expense.date) }}</td>
+              <td>
+                @if (expense.category) {
+                  <span class="category-badge">{{ expense.category }}</span>
+                } @else {
+                  <span class="no-category">-</span>
+                }
+              </td>
+              <td>
+                @if (expense.billingCompany || expense.billingStreet) {
+                  <div class="billing-address">
+                    @if (expense.billingCompany) {
+                      <div class="billing-company">{{ expense.billingCompany }}</div>
+                    }
+                    @if (expense.billingStreet) {
+                      <div class="billing-street">{{ expense.billingStreet }}</div>
+                    }
+                    @if (expense.billingPostalCode || expense.billingCity) {
+                      <div class="billing-city">
+                        @if (expense.billingPostalCode) {
+                          <span>{{ expense.billingPostalCode }}</span>
+                        }
+                        @if (expense.billingCity) {
+                          <span>{{ expense.billingCity }}</span>
+                        }
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <span class="no-address">-</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  }
+</div>
+

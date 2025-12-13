@@ -1,0 +1,152 @@
+<div class="expense-form-container">
+  <h2>Ajouter une dépense</h2>
+
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+
+  <form [formGroup]="expenseForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="userId">Utilisateur *</label>
+      @if (loadingUsers) {
+        <div class="loading">Chargement des utilisateurs...</div>
+      } @else {
+        <select
+          id="userId"
+          formControlName="userId"
+          [class.error]="expenseForm.get('userId')?.invalid && expenseForm.get('userId')?.touched"
+        >
+          <option value="">Sélectionner un utilisateur</option>
+          @for (user of users; track user.id) {
+            <option [value]="user.id">{{ user.name }}</option>
+          }
+        </select>
+      }
+      @if (expenseForm.get('userId')?.hasError('required') && expenseForm.get('userId')?.touched) {
+        <span class="error-message">L'utilisateur est requis</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description *</label>
+      <input
+        id="description"
+        type="text"
+        formControlName="description"
+        [class.error]="expenseForm.get('description')?.invalid && expenseForm.get('description')?.touched"
+        maxlength="50"
+        placeholder="Description de la dépense"
+      />
+      @if (expenseForm.get('description')?.hasError('required') && expenseForm.get('description')?.touched) {
+        <span class="error-message">La description est requise</span>
+      }
+      @if (expenseForm.get('description')?.hasError('maxlength') && expenseForm.get('description')?.touched) {
+        <span class="error-message">La description ne doit pas dépasser 50 caractères</span>
+      }
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="amount">Montant *</label>
+        <input
+          id="amount"
+          type="number"
+          formControlName="amount"
+          [class.error]="expenseForm.get('amount')?.invalid && expenseForm.get('amount')?.touched"
+          step="0.01"
+          min="0.01"
+          placeholder="0.00"
+        />
+        @if (expenseForm.get('amount')?.hasError('required') && expenseForm.get('amount')?.touched) {
+          <span class="error-message">Le montant est requis</span>
+        }
+        @if (expenseForm.get('amount')?.hasError('min') && expenseForm.get('amount')?.touched) {
+          <span class="error-message">Le montant doit être supérieur à 0</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="date">Date *</label>
+        <input
+          id="date"
+          type="date"
+          formControlName="date"
+          [class.error]="expenseForm.get('date')?.invalid && expenseForm.get('date')?.touched"
+        />
+        @if (expenseForm.get('date')?.hasError('required') && expenseForm.get('date')?.touched) {
+          <span class="error-message">La date est requise</span>
+        }
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="category">Catégorie</label>
+      <input
+        id="category"
+        type="text"
+        formControlName="category"
+        placeholder="Catégorie (optionnel)"
+      />
+    </div>
+
+    <div class="form-section">
+      <h3>Adresse de facturation (optionnel)</h3>
+
+      <div class="form-group">
+        <label for="billingCompany">Entreprise</label>
+        <input
+          id="billingCompany"
+          type="text"
+          formControlName="billingCompany"
+          placeholder="Nom de l'entreprise"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="billingStreet">Rue</label>
+        <input
+          id="billingStreet"
+          type="text"
+          formControlName="billingStreet"
+          placeholder="Numéro et nom de rue"
+        />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="billingPostalCode">Code postal</label>
+          <input
+            id="billingPostalCode"
+            type="text"
+            formControlName="billingPostalCode"
+            placeholder="Code postal"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="billingCity">Ville</label>
+          <input
+            id="billingCity"
+            type="text"
+            formControlName="billingCity"
+            placeholder="Ville"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" (click)="onCancel()" [disabled]="isSubmitting">
+        Annuler
+      </button>
+      <button type="submit" class="btn-submit" [disabled]="expenseForm.invalid || isSubmitting">
+        @if (isSubmitting) {
+          Création...
+        } @else {
+          Créer
+        }
+      </button>
+    </div>
+  </form>
+</div>
+
