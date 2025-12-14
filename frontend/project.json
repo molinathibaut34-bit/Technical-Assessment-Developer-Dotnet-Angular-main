@@ -90,6 +90,30 @@
         "staticFilePath": "dist/n2f/browser",
         "spa": true
       }
+    },
+    "e2e": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "cypress.config.ts",
+        "devServerTarget": "n2f:serve",
+        "testingType": "e2e"
+      },
+      "configurations": {
+        "production": {
+          "devServerTarget": "n2f:serve:production"
+        },
+        "ci": {
+          "devServerTarget": "n2f:serve-static"
+        }
+      }
+    },
+    "e2e-ci": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "cypress.config.ts",
+        "testingType": "e2e",
+        "devServerTarget": "n2f:serve-static"
+      }
     }
   }
 }
