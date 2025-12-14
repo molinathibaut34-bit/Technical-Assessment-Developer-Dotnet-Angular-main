@@ -1,46 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Domain.Entities;
+using WebApi.Models;
 using WebApi.Infrastructure.Persistence;
 
 namespace WebApi.Infrastructure.Api;
 
 internal static class ExpenseEndpoints
 {
-    public sealed record ExpenseInfo(
-        Guid Id,
-        string Description,
-        decimal Amount,
-        DateTime Date,
-        string? Category,
-        Guid UserId,
-        string UserName,
-        string? BillingCompany,
-        string? BillingStreet,
-        string? BillingPostalCode,
-        string? BillingCity);
-    
-    public sealed record CreateExpenseRequest(
-        string Description,
-        decimal Amount,
-        DateTime Date,
-        string? Category,
-        Guid UserId,
-        string? BillingCompany,
-        string? BillingStreet,
-        string? BillingPostalCode,
-        string? BillingCity);
-
-    public sealed record ExpenseReport(
-        Guid UserId,
-        string UserName,
-        int Year,
-        int Month,
-        DateTime PeriodStart,
-        DateTime PeriodEnd,
-        decimal TotalAmount,
-        int ExpenseCount,
-        IEnumerable<ExpenseInfo> Expenses);
 
     public static IEndpointRouteBuilder MapExpenseEndpoints(this IEndpointRouteBuilder endpoints)
     {

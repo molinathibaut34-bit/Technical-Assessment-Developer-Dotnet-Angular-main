@@ -1,15 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Domain.Entities;
+using WebApi.Models;
 using WebApi.Infrastructure.Persistence;
 
 namespace WebApi.Infrastructure.Api;
 
 internal static class UserEndpoints
 {
-    public sealed record UserInfo(Guid Id, string Name, bool IsActive);
-    public sealed record UserDetailInfo(Guid Id, string FirstName, string LastName, string Name, bool IsActive, decimal MonthlyExpenseQuota);
-    public sealed record CreateUserRequest(string FirstName, string LastName, bool IsActive, decimal MonthlyExpenseQuota);
-    public sealed record UpdateUserRequest(string FirstName, string LastName, bool IsActive, decimal MonthlyExpenseQuota);
 
     public static IEndpointRouteBuilder MapUserEndpoints(this IEndpointRouteBuilder endpoints)
     {
