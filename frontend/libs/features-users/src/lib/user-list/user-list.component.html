@@ -22,13 +22,54 @@
     <div class="error">{{ error() }}</div>
   }
 
-  @if (!loading() && !error() && !showForm()) {
+  @if (!loading() && !error() && !showForm() && !showReports()) {
     @if (users().length === 0) {
       <div class="empty">Aucun utilisateur trouvé</div>
     } @else {
+      <div class="selection-controls">
+        <div class="selection-info">
+          <label class="select-all-checkbox">
+            <input 
+              type="checkbox" 
+              [checked]="areAllActiveSelected()"
+              [indeterminate]="getSelectedCount() > 0 && !areAllActiveSelected()"
+              (change)="toggleSelectAll()"
+            />
+            <span>Sélectionner tous les utilisateurs actifs ({{ getSelectedCount() }}/{{ getActiveUsersCount() }})</span>
+          </label>
+        </div>
+        <div class="report-actions">
+          <button 
+            class="btn-generate-selected" 
+            [disabled]="getSelectedCount() === 0"
+            (click)="generateReportsForSelected()"
+            title="Générer les rapports pour les utilisateurs sélectionnés"
+          >
+            📊 Générer les rapports sélectionnés
+          </button>
+          <button 
+            class="btn-generate-all-active" 
+            [disabled]="getActiveUsersCount() === 0"
+            (click)="generateReportsForAllActive()"
+            title="Générer les rapports pour tous les utilisateurs actifs"
+          >
+            📊 Générer tous les rapports (actifs)
+          </button>
+        </div>
+      </div>
+
       <ul class="user-list">
         @for (user of users(); track user.id) {
           <li class="user-item">
+            <label class="user-checkbox">
+              <input 
+                type="checkbox" 
+                [checked]="isUserSelected(user.id)"
+                [disabled]="!user.isActive"
+                (change)="toggleUserSelection(user.id); $event.stopPropagation()"
+                (click)="$event.stopPropagation()"
+              />
+            </label>
             <a [routerLink]="['/users', user.id]" class="user-link">
               <span class="user-name">{{ user.name }}</span>
               <span class="user-status" [class.active]="user.isActive" [class.inactive]="!user.isActive">
@@ -48,6 +89,36 @@
         }
       </ul>
     }
+  }
+
+  @if (showReports()) {
+    <div class="reports-container">
+      <div class="reports-header">
+        <h2>Rapports de dépenses mensuels</h2>
+        <div class="reports-header-actions">
+          <button class="btn-print-all" (click)="printAllReports()">🖨️ Imprimer tous</button>
+          <button class="btn-close-reports" (click)="closeReports()">← Retour à la liste</button>
+        </div>
+      </div>
+
+      @if (generatingReports()) {
+        <div class="loading">Génération des rapports...</div>
+      }
+
+      @if (reports().length === 0 && !generatingReports()) {
+        <div class="empty">Aucun rapport disponible</div>
+      }
+
+      @for (report of reports(); track report.userId) {
+        <div class="report-wrapper">
+          <app-expense-report 
+            [userId]="report.userId" 
+            [year]="reportYear()"
+            [month]="reportMonth()"
+          />
+        </div>
+      }
+    </div>
   }
 </div>
 

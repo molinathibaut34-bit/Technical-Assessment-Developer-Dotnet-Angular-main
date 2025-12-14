@@ -8,7 +8,8 @@
     "start:win32": "nx serve --port %PORT%",
     "start:default": "nx serve --port $PORT",
     "build": "nx build",
-    "test": "nx test"
+    "test": "nx test",
+    "test:all":"nx run-many -t test"
   },
   "prettier": {
     "overrides": [

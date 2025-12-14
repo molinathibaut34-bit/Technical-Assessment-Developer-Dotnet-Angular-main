@@ -1,0 +1,154 @@
+<div class="reports-list-container">
+  <div class="header">
+    <h2>Liste des notes de frais</h2>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Chargement des utilisateurs...</div>
+  }
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  @if (showReport()) {
+    <div class="report-view">
+      <div class="report-header-actions">
+        <button class="btn-back" (click)="onCloseReport()">← Retour à la liste</button>
+      </div>
+          <app-expense-report 
+            [userId]="showReport()!.userId" 
+            [year]="showReport()!.year"
+            [month]="showReport()!.month"
+            [showDeleteButton]="true"
+            (deleted)="onReportDeleted()"
+          />
+    </div>
+  } @else {
+    @if (!loading() && !error()) {
+      <!-- Filtres -->
+      <div class="filters-section">
+        <h3>Filtres</h3>
+        <div class="filters">
+          <div class="filter-group">
+            <label for="year-filter">Année :</label>
+            <select 
+              id="year-filter"
+              [value]="selectedYear() ?? ''"
+              (change)="selectedYear.set($any($event.target).value ? +$any($event.target).value : null); onFilterChange()"
+            >
+              <option value="">Toutes</option>
+              @for (year of availableYears(); track year) {
+                <option [value]="year">{{ year }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="month-filter">Mois :</label>
+            <select 
+              id="month-filter"
+              [value]="selectedMonth() ?? ''"
+              (change)="selectedMonth.set($any($event.target).value ? +$any($event.target).value : null); onFilterChange()"
+            >
+              <option value="">Tous</option>
+              @for (month of availableMonths; track month) {
+                <option [value]="month">{{ monthNames[month - 1] }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="user-filter">Utilisateur :</label>
+            <select 
+              id="user-filter"
+              [value]="selectedUserId() ?? ''"
+              (change)="selectedUserId.set($any($event.target).value || null); onFilterChange()"
+            >
+              <option value="">Tous</option>
+              @for (user of users(); track user.id) {
+                @if (user.isActive) {
+                  <option [value]="user.id">{{ user.name }}</option>
+                }
+              }
+            </select>
+          </div>
+
+          <button class="btn-clear-filters" (click)="clearFilters()">Effacer les filtres</button>
+        </div>
+      </div>
+
+      <!-- Résumé -->
+      @if (filteredReports().length > 0) {
+        <div class="summary-section">
+          <div class="summary-item">
+            <span class="summary-label">Nombre de rapports :</span>
+            <span class="summary-value">{{ filteredReports().length }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Total des dépenses :</span>
+            <span class="summary-value total">{{ formatAmount(getTotalAmount()) }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Nombre total de dépenses :</span>
+            <span class="summary-value">{{ getTotalCount() }}</span>
+          </div>
+        </div>
+      }
+
+      <!-- Liste des rapports -->
+      @if (loadingReports()) {
+        <div class="loading">Chargement des rapports...</div>
+      } @else {
+        @if (filteredReports().length === 0) {
+          <div class="empty">Aucun rapport trouvé</div>
+        } @else {
+          <table class="reports-table">
+            <thead>
+              <tr>
+                <th>Utilisateur</th>
+                <th>Période</th>
+                <th>Nombre de dépenses</th>
+                <th>Montant total</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (report of filteredReports(); track report.userId + report.year + report.month) {
+                <tr>
+                  <td>
+                    <a [routerLink]="['/users', report.userId]" class="user-link">
+                      {{ report.userName }}
+                    </a>
+                  </td>
+                  <td>{{ report.monthName }} {{ report.year }}</td>
+                  <td>{{ report.expenseCount }}</td>
+                  <td class="amount">{{ formatAmount(report.totalAmount) }}</td>
+                  <td>
+                    <div class="action-buttons">
+                      <button 
+                        class="btn-view" 
+                        (click)="onViewReport(report)"
+                        title="Consulter le rapport"
+                      >
+                        👁️ Consulter
+                      </button>
+                      <button 
+                        class="btn-delete" 
+                        (click)="onDeleteReport(report)"
+                        title="Supprimer la note de frais"
+                      >
+                        🗑️ Supprimer
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      }
+    }
+  }
+</div>
+

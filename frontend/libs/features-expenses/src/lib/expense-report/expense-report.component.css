@@ -1,0 +1,303 @@
+.expense-report-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #fff;
+}
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.report-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.report-title h2 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 2rem;
+}
+
+.report-subtitle {
+  margin: 0;
+  color: #666;
+  font-size: 1rem;
+}
+
+.btn-print {
+  padding: 0.75rem 1.5rem;
+  background-color: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-print:hover {
+  background-color: #1565c0;
+}
+
+.btn-delete {
+  padding: 0.75rem 1.5rem;
+  background-color: #c62828;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-delete:hover:not(:disabled) {
+  background-color: #b71c1c;
+}
+
+.btn-delete:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@media print {
+  .btn-print,
+  .btn-delete {
+    display: none;
+  }
+}
+
+.loading,
+.error {
+  padding: 1rem;
+  border-radius: 4px;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.loading {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.error {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.report-info {
+  margin-bottom: 2rem;
+}
+
+.info-section {
+  margin-bottom: 1.5rem;
+}
+
+.info-section h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.25rem;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-label {
+  font-size: 0.875rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 1rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.summary-section {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.summary-card {
+  flex: 1;
+  padding: 1.5rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.summary-card.total {
+  background-color: #e3f2fd;
+  border-color: #1976d2;
+}
+
+.summary-label {
+  font-size: 0.875rem;
+  color: #666;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.summary-value {
+  font-size: 1.75rem;
+  color: #333;
+  font-weight: 700;
+}
+
+.summary-card.total .summary-value {
+  color: #1976d2;
+}
+
+.empty-message {
+  padding: 2rem;
+  text-align: center;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  color: #666;
+}
+
+.expenses-section {
+  margin-top: 2rem;
+}
+
+.expenses-section h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.25rem;
+}
+
+.expense-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.expense-table thead {
+  background-color: #f5f5f5;
+}
+
+.expense-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #e0e0e0;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  letter-spacing: 0.5px;
+}
+
+.expense-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  color: #333;
+}
+
+.expense-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+.expense-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.expense-table tfoot {
+  background-color: #f5f5f5;
+}
+
+.expense-table tfoot .total-row {
+  font-weight: 600;
+}
+
+.expense-table tfoot .total-row td {
+  border-top: 2px solid #e0e0e0;
+  padding: 1rem;
+}
+
+.amount {
+  font-weight: 600;
+  color: #c62828;
+}
+
+.total-amount {
+  font-size: 1.25rem;
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.no-category {
+  color: #999;
+  font-style: italic;
+}
+
+.billing-address {
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.billing-company {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+
+.billing-street {
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.billing-city {
+  color: #666;
+}
+
+.billing-city span:not(:last-child)::after {
+  content: " ";
+}
+
+.no-address {
+  color: #999;
+  font-style: italic;
+}
+
+@media print {
+  .expense-report-container {
+    padding: 0;
+  }
+
+  .expense-table {
+    box-shadow: none;
+  }
+}
+

@@ -17,6 +17,11 @@ export const appRoutes: Route[] = [
       import('@n2f/features-expenses').then((m) => m.ExpenseListComponent),
   },
   {
+    path: 'expense-reports',
+    loadComponent: () =>
+      import('@n2f/features-expenses').then((m) => m.ExpenseReportsListComponent),
+  },
+  {
     path: '',
     redirectTo: '/users',
     pathMatch: 'full',

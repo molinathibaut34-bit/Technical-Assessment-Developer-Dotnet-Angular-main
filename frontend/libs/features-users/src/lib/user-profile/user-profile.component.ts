@@ -4,13 +4,13 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { UserService, UserDetail } from '@n2f/data-access';
 import { ExpenseService, Expense } from '@n2f/data-access';
-import { ExpenseFormComponent } from '@n2f/features-expenses';
+import { ExpenseFormComponent, ExpenseReportComponent } from '@n2f/features-expenses';
 import { catchError, of, Subject, switchMap, startWith, tap } from 'rxjs';
 
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule, ExpenseFormComponent],
+  imports: [CommonModule, RouterModule, ExpenseFormComponent, ExpenseReportComponent],
   templateUrl: './user-profile.component.html',
   styleUrl: './user-profile.component.css',
 })
@@ -23,6 +23,9 @@ export class UserProfileComponent implements OnInit {
   error = signal<string | null>(null);
   userId: string | null = null;
   showExpenseForm = signal(false);
+  showExpenseReport = signal(false);
+  reportYear = signal<number | undefined>(undefined);
+  reportMonth = signal<number | undefined>(undefined);
 
   private expensesResult = toSignal(
     this.refreshExpensesTrigger.pipe(
@@ -175,6 +178,17 @@ export class UserProfileComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/users']);
+  }
+
+  onGenerateReport(): void {
+    const now = new Date();
+    this.reportYear.set(now.getFullYear());
+    this.reportMonth.set(now.getMonth() + 1);
+    this.showExpenseReport.set(true);
+  }
+
+  onReportClose(): void {
+    this.showExpenseReport.set(false);
   }
 }
 

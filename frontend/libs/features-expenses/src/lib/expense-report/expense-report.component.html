@@ -1,0 +1,143 @@
+<div class="expense-report-container">
+  @if (loading()) {
+    <div class="loading">Chargement du rapport...</div>
+  }
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  @if (report() && !loading() && !error()) {
+    <div class="report-header">
+      <div class="report-title">
+        <h2>Note de Frais</h2>
+        <p class="report-subtitle">Rapport mensuel des dépenses</p>
+      </div>
+      <div class="report-actions">
+        <button class="btn-print" (click)="printReport()">🖨️ Imprimer</button>
+        @if (showDeleteButton) {
+          <button 
+            class="btn-delete" 
+            (click)="deleteReport()"
+            [disabled]="deleting()"
+            title="Supprimer la note de frais"
+          >
+            @if (deleting()) {
+              Suppression...
+            } @else {
+              🗑️ Supprimer
+            }
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="report-info">
+      <div class="info-section">
+        <h3>Informations du rapport</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Utilisateur :</span>
+            <span class="info-value">{{ report()!.userName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Période :</span>
+            <span class="info-value">
+              {{ getMonthName(report()!.month) }} {{ report()!.year }}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Du :</span>
+            <span class="info-value">{{ formatDate(report()!.periodStart) }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Au :</span>
+            <span class="info-value">{{ formatDate(report()!.periodEnd) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-section">
+        <div class="summary-card">
+          <div class="summary-label">Nombre de dépenses</div>
+          <div class="summary-value">{{ report()!.expenseCount }}</div>
+        </div>
+        <div class="summary-card total">
+          <div class="summary-label">Total</div>
+          <div class="summary-value">{{ formatAmount(report()!.totalAmount) }}</div>
+        </div>
+      </div>
+    </div>
+
+    @if (report()!.expenses.length === 0) {
+      <div class="empty-message">
+        <p>Aucune dépense enregistrée pour cette période.</p>
+      </div>
+    } @else {
+      <div class="expenses-section">
+        <h3>Détail des dépenses</h3>
+        <table class="expense-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Catégorie</th>
+              <th>Montant</th>
+              <th>Adresse de facturation</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (expense of report()!.expenses; track expense.id) {
+              <tr>
+                <td>{{ formatDate(expense.date) }}</td>
+                <td>{{ expense.description }}</td>
+                <td>
+                  @if (expense.category) {
+                    <span class="category-badge">{{ expense.category }}</span>
+                  } @else {
+                    <span class="no-category">-</span>
+                  }
+                </td>
+                <td class="amount">{{ formatAmount(expense.amount) }}</td>
+                <td>
+                  @if (expense.billingCompany || expense.billingStreet) {
+                    <div class="billing-address">
+                      @if (expense.billingCompany) {
+                        <div class="billing-company">{{ expense.billingCompany }}</div>
+                      }
+                      @if (expense.billingStreet) {
+                        <div class="billing-street">{{ expense.billingStreet }}</div>
+                      }
+                      @if (expense.billingPostalCode || expense.billingCity) {
+                        <div class="billing-city">
+                          @if (expense.billingPostalCode) {
+                            <span>{{ expense.billingPostalCode }}</span>
+                          }
+                          @if (expense.billingCity) {
+                            <span>{{ expense.billingCity }}</span>
+                          }
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <span class="no-address">-</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td colspan="3"><strong>Total</strong></td>
+              <td class="amount total-amount">
+                <strong>{{ formatAmount(report()!.totalAmount) }}</strong>
+              </td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    }
+  }
+</div>
+

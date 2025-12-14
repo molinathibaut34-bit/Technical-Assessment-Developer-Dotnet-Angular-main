@@ -1,32 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
-export interface Expense {
-  id: string;
-  description: string;
-  amount: number;
-  date: string;
-  category?: string;
-  userId: string;
-  userName: string;
-  billingCompany?: string;
-  billingStreet?: string;
-  billingPostalCode?: string;
-  billingCity?: string;
-}
-
-export interface CreateExpenseRequest {
-  description: string;
-  amount: number;
-  date: string;
-  category?: string;
-  userId: string;
-  billingCompany?: string;
-  billingStreet?: string;
-  billingPostalCode?: string;
-  billingCity?: string;
-}
+import { Expense, CreateExpenseRequest, ExpenseReport } from '../models/expense.models';
 
 @Injectable({
   providedIn: 'root',
@@ -50,6 +25,42 @@ export class ExpenseService {
 
   getExpensesByUserId(userId: string): Observable<Expense[]> {
     return this.http.get<Expense[]>(`${this.apiUrl}/user/${userId}`);
+  }
+
+  getExpenseReport(userId: string, year?: number, month?: number): Observable<ExpenseReport> {
+    let url = `${this.apiUrl}/user/${userId}/report`;
+    const params: string[] = [];
+    
+    if (year !== undefined) {
+      params.push(`year=${year}`);
+    }
+    if (month !== undefined) {
+      params.push(`month=${month}`);
+    }
+    
+    if (params.length > 0) {
+      url += `?${params.join('&')}`;
+    }
+    
+    return this.http.get<ExpenseReport>(url);
+  }
+
+  deleteExpenseReport(userId: string, year?: number, month?: number): Observable<void> {
+    let url = `${this.apiUrl}/user/${userId}/report`;
+    const params: string[] = [];
+    
+    if (year !== undefined) {
+      params.push(`year=${year}`);
+    }
+    if (month !== undefined) {
+      params.push(`month=${month}`);
+    }
+    
+    if (params.length > 0) {
+      url += `?${params.join('&')}`;
+    }
+    
+    return this.http.delete<void>(url);
   }
 
   deleteExpense(id: string): Observable<void> {

@@ -46,18 +46,40 @@
     <div class="expenses-section">
       <div class="expenses-header">
         <h2>Dépenses</h2>
-        @if (!showExpenseForm()) {
-          <button 
-            class="btn-add-expense" 
-            [class.disabled]="quotaExceeded() || !user()?.isActive"
-            [disabled]="quotaExceeded() || !user()?.isActive"
-            (click)="onAddExpense()"
-            [title]="!user()?.isActive ? 'L\'utilisateur est inactif' : (quotaExceeded() ? 'Le quota mensuel est dépassé' : 'Ajouter une dépense')"
-          >
-            + Ajouter une dépense
-          </button>
+        @if (!showExpenseForm() && !showExpenseReport()) {
+          <div class="header-actions">
+            <button 
+              class="btn-generate-report" 
+              (click)="onGenerateReport()"
+              title="Générer un rapport de dépenses mensuel"
+            >
+              📊 Générer le rapport mensuel
+            </button>
+            <button 
+              class="btn-add-expense" 
+              [class.disabled]="quotaExceeded() || !user()?.isActive"
+              [disabled]="quotaExceeded() || !user()?.isActive"
+              (click)="onAddExpense()"
+              [title]="!user()?.isActive ? 'L\'utilisateur est inactif' : (quotaExceeded() ? 'Le quota mensuel est dépassé' : 'Ajouter une dépense')"
+            >
+              + Ajouter une dépense
+            </button>
+          </div>
         }
       </div>
+
+      @if (showExpenseReport()) {
+        <div class="report-section">
+          <div class="report-header-actions">
+            <button class="btn-close-report" (click)="onReportClose()">← Retour aux dépenses</button>
+          </div>
+          <app-expense-report 
+            [userId]="userId!" 
+            [year]="reportYear()"
+            [month]="reportMonth()"
+          />
+        </div>
+      }
 
       @if (showExpenseForm()) {
         <app-expense-form
@@ -67,11 +89,11 @@
         />
       }
 
-      @if (loadingExpenses()) {
+      @if (loadingExpenses() && !showExpenseReport()) {
         <div class="loading">Chargement des dépenses...</div>
       }
 
-      @if (!loadingExpenses() && !showExpenseForm()) {
+      @if (!loadingExpenses() && !showExpenseForm() && !showExpenseReport()) {
         @if (expenses().length === 0) {
           <div class="empty">Aucune dépense trouvée</div>
         } @else {
