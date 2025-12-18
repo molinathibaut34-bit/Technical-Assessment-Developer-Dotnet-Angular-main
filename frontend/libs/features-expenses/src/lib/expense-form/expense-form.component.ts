@@ -15,6 +15,7 @@ import { catchError, of, map } from 'rxjs';
 })
 export class ExpenseFormComponent implements OnInit {
   @Input() userId?: string;
+  @Input() defaultDate?: string;
   @Output() saved = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();
 
@@ -48,7 +49,6 @@ export class ExpenseFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
   ) {
-    // Initialiser le formulaire sans userId pour l'instant
     this.expenseForm = this.fb.group({
       description: ['', [Validators.required, Validators.maxLength(50)]],
       amount: ['', [Validators.required, Validators.min(0.01)]],
@@ -63,7 +63,6 @@ export class ExpenseFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Si userId est fourni, vérifier que l'utilisateur est actif
     if (this.userId) {
       this.userService.getUserById(this.userId).subscribe({
         next: (user) => {
@@ -73,7 +72,6 @@ export class ExpenseFormComponent implements OnInit {
           }
           this.expenseForm.patchValue({ userId: this.userId });
           this.expenseForm.get('userId')?.disable();
-          // Retirer le validateur required car le champ est pré-rempli
           this.expenseForm.get('userId')?.clearValidators();
           this.expenseForm.get('userId')?.updateValueAndValidity();
           this.loadingUsers.set(false);
@@ -86,15 +84,13 @@ export class ExpenseFormComponent implements OnInit {
       });
     } else {
       this.loadingUsers.set(true);
-      // Le chargement des utilisateurs se fait automatiquement via toSignal
       setTimeout(() => {
         this.loadingUsers.set(false);
       }, 100);
     }
     
-    // Définir la date par défaut à aujourd'hui
-    const today = new Date().toISOString().split('T')[0];
-    this.expenseForm.patchValue({ date: today });
+    const defaultDate = this.defaultDate || new Date().toISOString().split('T')[0];
+    this.expenseForm.patchValue({ date: defaultDate });
   }
 
   onSubmit(): void {
@@ -105,7 +101,6 @@ export class ExpenseFormComponent implements OnInit {
     this.isSubmitting.set(true);
     this.error.set(null);
 
-    // Si userId est désactivé, récupérer sa valeur
     const formValue = this.expenseForm.getRawValue();
 
     const createRequest: CreateExpenseRequest = {
@@ -133,7 +128,6 @@ export class ExpenseFormComponent implements OnInit {
           errorMessage = err.error;
         }
         
-        // Messages spécifiques pour les erreurs connues
         if (errorMessage.includes('inactive user') || errorMessage.includes('utilisateur inactif')) {
           errorMessage = 'Impossible d\'ajouter une dépense à un utilisateur inactif.';
         }

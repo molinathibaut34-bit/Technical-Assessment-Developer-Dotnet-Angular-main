@@ -17,7 +17,6 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-// Apply database migrations
 try
 {
     using var sp = app.Services.CreateScope();
@@ -37,7 +36,6 @@ catch (Exception e)
     {
         logger.LogError("Inner exception: {InnerMessage}", e.InnerException.Message);
     }
-    // Continue execution instead of returning to allow manual SQL fix
     logger.LogWarning("Application will continue, but database may be in an inconsistent state.");
     logger.LogWarning("Please ensure the database exists and migrations are applied manually if needed.");
 }

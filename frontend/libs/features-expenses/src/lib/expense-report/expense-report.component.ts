@@ -1,12 +1,15 @@
-import { Component, Input, Output, EventEmitter, OnInit, signal, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ExpenseService, ExpenseReport } from '@n2f/data-access';
-import { catchError, of } from 'rxjs';
+import { ExpenseFormComponent } from '../expense-form/expense-form.component';
+
+type SortColumn = 'date' | 'amount' | null;
+type SortDirection = 'asc' | 'desc';
 
 @Component({
   selector: 'app-expense-report',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ExpenseFormComponent],
   templateUrl: './expense-report.component.html',
   styleUrl: './expense-report.component.css',
 })
@@ -23,6 +26,13 @@ export class ExpenseReportComponent implements OnInit {
   loading = signal(false);
   deleting = signal(false);
   error = signal<string | null>(null);
+  showAddExpenseForm = signal(false);
+  
+  readonly itemsPerPage = 5;
+  currentPage = signal(1);
+
+  sortColumn = signal<SortColumn>('date');
+  sortDirection = signal<SortDirection>('desc');
 
   ngOnInit(): void {
     if (this.userId) {
@@ -37,6 +47,7 @@ export class ExpenseReportComponent implements OnInit {
     this.expenseService.getExpenseReport(this.userId, this.year, this.month).subscribe({
       next: (report) => {
         this.report.set(report);
+        this.resetPagination();
         this.loading.set(false);
       },
       error: (err) => {
@@ -95,5 +106,125 @@ export class ExpenseReportComponent implements OnInit {
       });
     }
   }
-}
 
+  onAddExpense(): void {
+    this.showAddExpenseForm.set(true);
+  }
+
+  onExpenseSaved(): void {
+    this.showAddExpenseForm.set(false);
+    this.loadReport();
+  }
+
+  onExpenseCancelled(): void {
+    this.showAddExpenseForm.set(false);
+  }
+
+  getDefaultDate(): string {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  sortedExpenses = computed(() => {
+    const report = this.report();
+    if (!report || report.expenses.length === 0) {
+      return [];
+    }
+
+    const column = this.sortColumn();
+    const direction = this.sortDirection();
+
+    if (!column) {
+      return report.expenses;
+    }
+
+    const sorted = [...report.expenses].sort((a, b) => {
+      let comparison = 0;
+
+      switch (column) {
+        case 'amount':
+          comparison = a.amount - b.amount;
+          break;
+        case 'date':
+          comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+          break;
+      }
+
+      return direction === 'asc' ? comparison : -comparison;
+    });
+
+    return sorted;
+  });
+
+  paginatedExpenses = computed(() => {
+    const sorted = this.sortedExpenses();
+    if (sorted.length === 0) {
+      return [];
+    }
+    const startIndex = (this.currentPage() - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    return sorted.slice(startIndex, endIndex);
+  });
+
+  totalPages = computed(() => {
+    const sorted = this.sortedExpenses();
+    if (sorted.length === 0) {
+      return 0;
+    }
+    return Math.ceil(sorted.length / this.itemsPerPage);
+  });
+
+  hasPreviousPage = computed(() => this.currentPage() > 1);
+  hasNextPage = computed(() => this.currentPage() < this.totalPages());
+
+  goToPreviousPage(): void {
+    if (this.hasPreviousPage()) {
+      this.currentPage.update(page => page - 1);
+    }
+  }
+
+  goToNextPage(): void {
+    if (this.hasNextPage()) {
+      this.currentPage.update(page => page + 1);
+    }
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
+  }
+
+  resetPagination(): void {
+    this.currentPage.set(1);
+  }
+
+  pageNumbers = computed(() => {
+    const pages: number[] = [];
+    const total = this.totalPages();
+    for (let i = 1; i <= total; i++) {
+      pages.push(i);
+    }
+    return pages;
+  });
+
+  onSort(column: SortColumn): void {
+    if (this.sortColumn() === column) {
+      this.sortDirection.set(this.sortDirection() === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.sortColumn.set(column);
+      this.sortDirection.set('asc');
+    }
+    this.resetPagination();
+  }
+
+  getSortIcon(column: SortColumn): string {
+    if (this.sortColumn() !== column) {
+      return '⇅';
+    }
+    return this.sortDirection() === 'asc' ? '↑' : '↓';
+  }
+
+  isSorted(column: SortColumn): boolean {
+    return this.sortColumn() === column;
+  }
+}

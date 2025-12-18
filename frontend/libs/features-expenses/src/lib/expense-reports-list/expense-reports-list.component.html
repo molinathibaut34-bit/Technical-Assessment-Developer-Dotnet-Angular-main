@@ -52,7 +52,7 @@
               (change)="selectedMonth.set($any($event.target).value ? +$any($event.target).value : null); onFilterChange()"
             >
               <option value="">Tous</option>
-              @for (month of availableMonths; track month) {
+              @for (month of availableMonths(); track month) {
                 <option [value]="month">{{ monthNames[month - 1] }}</option>
               }
             </select>
@@ -66,10 +66,8 @@
               (change)="selectedUserId.set($any($event.target).value || null); onFilterChange()"
             >
               <option value="">Tous</option>
-              @for (user of users(); track user.id) {
-                @if (user.isActive) {
-                  <option [value]="user.id">{{ user.name }}</option>
-                }
+              @for (user of availableUsers(); track user.id) {
+                <option [value]="user.id">{{ user.name }}</option>
               }
             </select>
           </div>

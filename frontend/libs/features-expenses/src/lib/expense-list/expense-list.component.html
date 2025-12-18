@@ -22,27 +22,94 @@
   }
 
   @if (!loading() && !error() && !showForm()) {
-    @if (expenses().length === 0) {
+    @if ((expensesResult() ?? []).length === 0) {
       <div class="empty">Aucune dépense trouvée</div>
     } @else {
-      <div class="expenses-summary">
-        <div class="summary-item">
-          <span class="summary-label">Nombre de dépenses :</span>
-          <span class="summary-value">{{ expenses().length }}</span>
-        </div>
-        <div class="summary-item">
-          <span class="summary-label">Total :</span>
-          <span class="summary-value total">{{ formatAmount(totalAmount()) }}</span>
+      <div class="filters-section">
+        <h3>Filtres</h3>
+        <div class="filters">
+          <div class="filter-group">
+            <label for="year-filter">Année :</label>
+            <select 
+              id="year-filter"
+              [value]="selectedYear() ?? ''"
+              (change)="selectedYear.set($any($event.target).value ? +$any($event.target).value : null); onFilterChange()"
+            >
+              <option value="">Toutes</option>
+              @for (year of availableYears(); track year) {
+                <option [value]="year">{{ year }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="month-filter">Mois :</label>
+            <select 
+              id="month-filter"
+              [value]="selectedMonth() ?? ''"
+              (change)="selectedMonth.set($any($event.target).value ? +$any($event.target).value : null); onFilterChange()"
+            >
+              <option value="">Tous</option>
+              @for (month of availableMonths(); track month) {
+                <option [value]="month">{{ monthNames[month - 1] }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="user-filter">Utilisateur :</label>
+            <select 
+              id="user-filter"
+              [value]="selectedUserId() ?? ''"
+              (change)="selectedUserId.set($any($event.target).value || null); onFilterChange()"
+            >
+              <option value="">Tous</option>
+              @for (user of availableUsers(); track user.id) {
+                <option [value]="user.id">{{ user.name }}</option>
+              }
+            </select>
+          </div>
+
+          <button class="btn-clear-filters" (click)="clearFilters()">Effacer les filtres</button>
         </div>
       </div>
 
-      <table class="expense-table">
+      @if (expenses().length === 0) {
+        <div class="empty">Aucune dépense ne correspond aux filtres sélectionnés</div>
+      } @else {
+        <div class="expenses-summary">
+          <div class="summary-item">
+            <span class="summary-label">Nombre de dépenses :</span>
+            <span class="summary-value">{{ expenses().length }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Total :</span>
+            <span class="summary-value total">{{ formatAmount(totalAmount()) }}</span>
+          </div>
+        </div>
+
+        <table class="expense-table">
         <thead>
           <tr>
-            <th>Utilisateur</th>
+            <th>
+              <button class="sortable-header" (click)="onSort('user')" [class.sorted]="isSorted('user')">
+                Utilisateur
+                <span class="sort-icon">{{ getSortIcon('user') }}</span>
+              </button>
+            </th>
             <th>Description</th>
-            <th>Montant</th>
-            <th>Date</th>
+            <th>
+              <button class="sortable-header" (click)="onSort('amount')" [class.sorted]="isSorted('amount')">
+                Montant
+                <span class="sort-icon">{{ getSortIcon('amount') }}</span>
+              </button>
+            </th>
+            <th>
+              <button class="sortable-header" (click)="onSort('date')" [class.sorted]="isSorted('date')">
+                Date
+                <span class="sort-icon">{{ getSortIcon('date') }}</span>
+              </button>
+            </th>
             <th>Catégorie</th>
             <th>Adresse de facturation</th>
             <th>Actions</th>
@@ -99,6 +166,7 @@
           }
         </tbody>
       </table>
+      }
     }
   }
 </div>

@@ -7,7 +7,22 @@
     <div class="error">{{ error() }}</div>
   }
 
-  @if (report() && !loading() && !error()) {
+  @if (showAddExpenseForm() && report()) {
+    <div class="add-expense-section">
+      <div class="add-expense-header">
+        <h3>Ajouter une dépense à la note de frais</h3>
+        <button class="btn-close-form" (click)="onExpenseCancelled()">✕ Fermer</button>
+      </div>
+      <app-expense-form
+        [userId]="report()!.userId"
+        [defaultDate]="getDefaultDate()"
+        (saved)="onExpenseSaved()"
+        (cancelled)="onExpenseCancelled()"
+      />
+    </div>
+  }
+
+  @if (report() && !loading() && !error() && !showAddExpenseForm()) {
     <div class="report-header">
       <div class="report-title">
         <h2>Note de Frais</h2>
@@ -15,6 +30,14 @@
       </div>
       <div class="report-actions">
         <button class="btn-print" (click)="printReport()">🖨️ Imprimer</button>
+        <button 
+          class="btn-add-expense" 
+          (click)="onAddExpense()"
+          [disabled]="showAddExpenseForm()"
+          title="Ajouter une dépense à cette note de frais"
+        >
+          + Ajouter une dépense
+        </button>
         @if (showDeleteButton) {
           <button 
             class="btn-delete" 
@@ -79,15 +102,25 @@
         <table class="expense-table">
           <thead>
             <tr>
-              <th>Date</th>
+              <th>
+                <button class="sortable-header" (click)="onSort('date')" [class.sorted]="isSorted('date')">
+                  Date
+                  <span class="sort-icon">{{ getSortIcon('date') }}</span>
+                </button>
+              </th>
               <th>Description</th>
               <th>Catégorie</th>
-              <th>Montant</th>
+              <th>
+                <button class="sortable-header" (click)="onSort('amount')" [class.sorted]="isSorted('amount')">
+                  Montant
+                  <span class="sort-icon">{{ getSortIcon('amount') }}</span>
+                </button>
+              </th>
               <th>Adresse de facturation</th>
             </tr>
           </thead>
           <tbody>
-            @for (expense of report()!.expenses; track expense.id) {
+            @for (expense of paginatedExpenses(); track expense.id) {
               <tr>
                 <td>{{ formatDate(expense.date) }}</td>
                 <td>{{ expense.description }}</td>
@@ -136,6 +169,45 @@
             </tr>
           </tfoot>
         </table>
+
+        @if (totalPages() > 1) {
+          <div class="pagination">
+            <div class="pagination-info">
+              Page {{ currentPage() }} sur {{ totalPages() }}
+              ({{ sortedExpenses().length }} dépense{{ sortedExpenses().length > 1 ? 's' : '' }} au total)
+            </div>
+            <div class="pagination-controls">
+              <button 
+                class="btn-pagination"
+                (click)="goToPreviousPage()"
+                [disabled]="!hasPreviousPage()"
+                title="Page précédente"
+              >
+                ← Précédent
+              </button>
+              <div class="page-numbers">
+                @for (page of pageNumbers(); track page) {
+                  <button
+                    class="btn-page-number"
+                    [class.active]="currentPage() === page"
+                    (click)="goToPage(page)"
+                    title="Aller à la page {{ page }}"
+                  >
+                    {{ page }}
+                  </button>
+                }
+              </div>
+              <button 
+                class="btn-pagination"
+                (click)="goToNextPage()"
+                [disabled]="!hasNextPage()"
+                title="Page suivante"
+              >
+                Suivant →
+              </button>
+            </div>
+          </div>
+        }
       </div>
     }
   }

@@ -8,11 +8,9 @@ internal sealed class Expense
     public DateTime Date { get; set; }
     public string? Category { get; set; }
     
-    // Relation avec User
     public Guid UserId { get; set; }
     public User User { get; set; } = null!;
     
-    // Adresse de facturation
     public string? BillingCompany { get; set; }
     public string? BillingStreet { get; set; }
     public string? BillingPostalCode { get; set; }

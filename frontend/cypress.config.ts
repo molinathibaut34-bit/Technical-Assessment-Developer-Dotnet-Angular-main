@@ -3,7 +3,7 @@ import { nxE2EPreset } from '@nx/cypress/plugins/cypress-preset';
 
 // Utiliser le port du serveur de développement depuis la variable d'environnement
 // ou le port par défaut 4200
-const port = process.env.PORT || process.env.CYPRESS_PORT || '4200';
+const port = process.env.PORT || process.env.CYPRESS_PORT || '63791';
 const baseUrl = process.env.CYPRESS_BASE_URL || `http://localhost:${port}`;
 
 const preset = nxE2EPreset(__dirname);

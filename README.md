@@ -91,4 +91,4 @@ La page de visualisation d'une note de frais permet :
 
 ## Mes Notes
 
-À compléter par vos soins.
+Ajout de Cypress pour les test end  to end non fonctionnel.

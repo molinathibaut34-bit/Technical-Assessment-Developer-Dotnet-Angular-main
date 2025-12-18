@@ -141,27 +141,22 @@ internal static class ExpenseEndpoints
 
     private static async Task<IResult> CreateExpense(CreateExpenseRequest request, AppDbContext db)
     {
-        // Vérifier que l'utilisateur existe
         var user = await db.Set<User>().FirstOrDefaultAsync(u => u.Id == request.UserId);
         if (user == null)
         {
             return Results.NotFound("User not found");
         }
 
-        // Vérifier que l'utilisateur est actif
         if (!user.IsActive)
         {
             return Results.BadRequest("Impossible d'ajouter une dépense à un utilisateur inactif");
         }
 
-        // Vérifier la longueur de la description
         if (request.Description.Length > 50)
         {
             return Results.BadRequest("Description cannot exceed 50 characters");
         }
 
-        // Vérifier le quota mensuel
-        // Convertir la date en UTC si nécessaire
         var expenseDate = request.Date.Kind == DateTimeKind.Utc 
             ? request.Date.Date 
             : request.Date.ToUniversalTime().Date;
@@ -177,7 +172,6 @@ internal static class ExpenseEndpoints
             return Results.BadRequest($"Le quota mensuel de {user.MonthlyExpenseQuota:C} est dépassé. Montant actuel: {monthlyTotal:C}, tentative d'ajout: {request.Amount:C}");
         }
 
-        // S'assurer que la date est en UTC avant de l'enregistrer
         var expenseDateUtc = request.Date.Kind == DateTimeKind.Utc 
             ? request.Date 
             : request.Date.ToUniversalTime();
@@ -221,19 +215,16 @@ internal static class ExpenseEndpoints
         [FromQuery] int? month,
         AppDbContext db)
     {
-        // Vérifier que l'utilisateur existe
         var user = await db.Set<User>().FirstOrDefaultAsync(u => u.Id == userId);
         if (user == null)
         {
             return Results.NotFound("User not found");
         }
 
-        // Utiliser l'année et le mois actuels si non spécifiés
         var now = DateTime.Now;
         var reportYear = year ?? now.Year;
         var reportMonth = month ?? now.Month;
 
-        // Valider les paramètres
         if (reportYear < 2000 || reportYear > 2100)
         {
             return Results.BadRequest("L'année doit être entre 2000 et 2100");
@@ -244,14 +235,9 @@ internal static class ExpenseEndpoints
             return Results.BadRequest("Le mois doit être entre 1 et 12");
         }
 
-        // Calculer les dates de début et fin du mois en UTC
-        // Le premier jour du mois à 00:00:00 UTC
         var periodStart = new DateTime(reportYear, reportMonth, 1, 0, 0, 0, DateTimeKind.Utc);
-        // Le premier jour du mois suivant à 00:00:00 UTC (exclusif)
         var periodEnd = periodStart.AddMonths(1);
 
-        // Récupérer les dépenses du mois
-        // Utiliser une comparaison >= start et < end (exclusif) pour être sûr de capturer toutes les dates
         var expenses = await db.Set<Expense>()
             .Where(e => e.UserId == userId && e.Date >= periodStart && e.Date < periodEnd)
             .OrderBy(e => e.Date)
@@ -271,7 +257,6 @@ internal static class ExpenseEndpoints
 
         var totalAmount = expenses.Sum(e => e.Amount);
 
-        // Pour l'affichage, utiliser la date de fin réelle du mois
         var periodEndDisplay = new DateTime(reportYear, reportMonth, DateTime.DaysInMonth(reportYear, reportMonth), 23, 59, 59, DateTimeKind.Utc);
 
         var report = new ExpenseReport(
@@ -294,19 +279,16 @@ internal static class ExpenseEndpoints
         [FromQuery] int? month,
         AppDbContext db)
     {
-        // Vérifier que l'utilisateur existe
         var user = await db.Set<User>().FirstOrDefaultAsync(u => u.Id == userId);
         if (user == null)
         {
             return Results.NotFound("User not found");
         }
 
-        // Utiliser l'année et le mois actuels si non spécifiés
         var now = DateTime.Now;
         var reportYear = year ?? now.Year;
         var reportMonth = month ?? now.Month;
 
-        // Valider les paramètres
         if (reportYear < 2000 || reportYear > 2100)
         {
             return Results.BadRequest("L'année doit être entre 2000 et 2100");
@@ -317,14 +299,9 @@ internal static class ExpenseEndpoints
             return Results.BadRequest("Le mois doit être entre 1 et 12");
         }
 
-        // Calculer les dates de début et fin du mois en UTC
-        // Le premier jour du mois à 00:00:00 UTC
         var periodStart = new DateTime(reportYear, reportMonth, 1, 0, 0, 0, DateTimeKind.Utc);
-        // Le premier jour du mois suivant à 00:00:00 UTC (exclusif)
         var periodEnd = periodStart.AddMonths(1);
 
-        // Récupérer toutes les dépenses du mois
-        // Utiliser une comparaison >= start et < end (exclusif) pour être sûr de capturer toutes les dates
         var expenses = await db.Set<Expense>()
             .Where(e => e.UserId == userId && e.Date >= periodStart && e.Date < periodEnd)
             .ToListAsync();
@@ -334,7 +311,6 @@ internal static class ExpenseEndpoints
             return Results.NotFound("Aucune dépense trouvée pour cette période");
         }
 
-        // Supprimer toutes les dépenses
         db.Set<Expense>().RemoveRange(expenses);
         await db.SaveChangesAsync();
 

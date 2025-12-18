@@ -36,21 +36,36 @@ export class ExpenseReportsListComponent implements OnInit {
   loadingReports = signal(false);
   error = signal<string | null>(null);
   
-  // Filtres
   selectedYear = signal<number | null>(null);
   selectedMonth = signal<number | null>(null);
   selectedUserId = signal<string | null>(null);
   
-  // Affichage
   showReport = signal<ReportListItem | null>(null);
   
-  // Années et mois disponibles
-  availableYears = signal<number[]>([]);
-  availableMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-  monthNames = [
+  readonly monthNames: readonly string[] = [
     'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
     'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
   ];
+
+  availableYears = computed(() => {
+    const years = this.reports().map(r => r.year);
+    return [...new Set(years)].sort((a, b) => b - a);
+  });
+
+  availableMonths = computed(() => {
+    const months = this.reports().map(r => r.month);
+    return [...new Set(months)].sort((a, b) => a - b);
+  });
+
+  availableUsers = computed(() => {
+    const userMap = new Map<string, { id: string; name: string }>();
+    this.reports().forEach(r => {
+      if (!userMap.has(r.userId)) {
+        userMap.set(r.userId, { id: r.userId, name: r.userName });
+      }
+    });
+    return Array.from(userMap.values()).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+  });
 
   filteredReports = computed(() => {
     let filtered = this.reports();
@@ -90,7 +105,6 @@ export class ExpenseReportsListComponent implements OnInit {
   );
 
   constructor() {
-    // Effet pour charger les rapports quand les utilisateurs sont chargés
     effect(() => {
       const users = this.usersResult();
       if (users && users.length > 0 && this.users().length === 0) {
@@ -108,16 +122,10 @@ export class ExpenseReportsListComponent implements OnInit {
   initializeFilters(): void {
     const now = new Date();
     const currentYear = now.getFullYear();
-    const years: number[] = [];
+    const currentMonth = now.getMonth() + 1;
     
-    // Générer les 3 dernières années + l'année en cours
-    for (let i = 0; i < 4; i++) {
-      years.push(currentYear - i);
-    }
-    
-    this.availableYears.set(years);
     this.selectedYear.set(currentYear);
-    this.selectedMonth.set(now.getMonth() + 1);
+    this.selectedMonth.set(currentMonth);
   }
 
   loadUsers(): void {
@@ -141,7 +149,6 @@ export class ExpenseReportsListComponent implements OnInit {
     
     users.forEach(user => {
       if (user.isActive) {
-        // Générer les rapports pour les 12 derniers mois
         for (let i = 0; i < 12; i++) {
           let year = currentYear;
           let month = currentMonth - i;
@@ -161,7 +168,6 @@ export class ExpenseReportsListComponent implements OnInit {
       }
     });
 
-    // Charger tous les rapports en parallèle
     const requests = reportRequests.map(req => 
       this.expenseService.getExpenseReport(req.userId, req.year, req.month).pipe(
         catchError(err => {
@@ -189,7 +195,6 @@ export class ExpenseReportsListComponent implements OnInit {
     forkJoin(requests).subscribe({
       next: (results) => {
         const validReports = results.filter((r): r is ReportListItem => r !== null);
-        // Trier par année (décroissant), mois (décroissant), puis nom d'utilisateur
         validReports.sort((a, b) => {
           if (a.year !== b.year) return b.year - a.year;
           if (a.month !== b.month) return b.month - a.month;
@@ -207,7 +212,6 @@ export class ExpenseReportsListComponent implements OnInit {
   }
 
   onFilterChange(): void {
-    // Les filtres sont appliqués automatiquement via le computed
   }
 
   onViewReport(item: ReportListItem): void {
@@ -221,13 +225,11 @@ export class ExpenseReportsListComponent implements OnInit {
   onReportDeleted(): void {
     const currentReport = this.showReport();
     if (currentReport) {
-      // Retirer le rapport de la liste
       const currentReports = this.reports();
       const updatedReports = currentReports.filter(
         r => !(r.userId === currentReport.userId && r.year === currentReport.year && r.month === currentReport.month)
       );
       this.reports.set(updatedReports);
-      // Fermer la vue du rapport
       this.showReport.set(null);
     }
   }
@@ -263,7 +265,6 @@ export class ExpenseReportsListComponent implements OnInit {
 
       this.expenseService.deleteExpenseReport(item.userId, item.year, item.month).subscribe({
         next: () => {
-          // Retirer le rapport de la liste
           const currentReports = this.reports();
           const updatedReports = currentReports.filter(
             r => !(r.userId === item.userId && r.year === item.year && r.month === item.month)
